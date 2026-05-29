@@ -1,0 +1,28 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "backend-dev",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Get-Content .env.local | Where-Object { $_ -match '=' -and -not $_.StartsWith('#') } | ForEach-Object { $name, $value = $_ -split '=', 2; [System.Environment]::SetEnvironmentVariable($name.Trim(), $value.Trim(), 'Process') }; python -m uvicorn api.index:app --reload --host 127.0.0.1 --port 8000"
+			],
+			"isBackground": true,
+			"group": "build"
+		},
+		{
+			"label": "frontend-dev",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"run",
+				"dev"
+			],
+			"isBackground": true,
+			"group": "build"
+		}
+	]
+}

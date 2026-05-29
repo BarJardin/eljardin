@@ -1,36 +1,75 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Frontend Next.js con Supabase directo
 
-## Getting Started
+Este proyecto usa solo frontend (Next.js) para consultar datos directamente desde Supabase y mostrarlos en la web.
 
-First, run the development server:
+## Arquitectura
+
+- Frontend: Next.js (App Router)
+- Datos: Supabase REST API con claves publicas de entorno
+
+No hay backend Python ni capa intermedia `/api/*` en esta configuracion.
+
+## Variables de entorno
+
+Configura estas variables en `.env.local`:
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `NEXT_PUBLIC_SUPABASE_MENU_IMAGES_BUCKET=menu-images`
+- `NEXT_PUBLIC_SUPABASE_MENU_ITEM_VIDEOS_BUCKET=menu-item-videos`
+
+## Desarrollo local
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Frontend: `http://localhost:3000`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Capa de datos
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+El acceso de lectura esta en `src/lib/supabase-public.ts`.
 
-## Learn More
+La home social consume:
 
-To learn more about Next.js, take a look at the following resources:
+- `site_settings`
+- `menu_cards`
+- `menu_items`
+- `testimonials`
+- `business_hours`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Al hacer click en una categoria (`menu_cards.href`), la app resuelve una vista de detalle con los platos (`menu_items`) asociados a esa card.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Idiomas (auto/manual)
 
-## Deploy on Vercel
+- Selector de idioma en la esquina superior derecha de la home social.
+- Modo `AUTO` (detecta idioma del navegador) y modos manuales `ES`, `US`, `GB`, `FR`, `IT`.
+- La preferencia se persiste en `localStorage` y en query param `lang` para mantenerla en la navegacion.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Ejemplos:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `/?lang=auto`
+- `/?lang=es`
+- `/?lang=fr`
+
+## Esquema SQL para contenido multidioma
+
+Para preparar traducciones de contenido dinamico en Supabase, ejecutar:
+
+- `sql/006_i18n_content_schema.sql`
+
+## Subcategorias de platos y videos
+
+Para habilitar platos dentro de cada categoria y guardar videos verticales en Supabase, ejecutar tambien:
+
+- `sql/007_menu_items_schema.sql`
+- `sql/008_storage_menu_item_videos.sql`
+
+En `/admin`, cada `Menu Card` incluye ahora una subseccion para crear un numero indeterminado de platos con:
+
+- titulo
+- descripcion
+- video vertical
+- orden
+- estado activo
